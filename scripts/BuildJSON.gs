@@ -27,6 +27,21 @@ function extractGoogleSheet_(value, settings) {
   return JSON.parse(json);
 }
 
+function extractGoogleTab_(value, settings) {
+
+  // If this field is blank then return an empty array
+  if (!value) return [];
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(value);
+
+  // Build a JSON object containing our spreadsheet
+  var json = buildJSON_(sheet, settings);
+
+  // We don't want to double stringify json, so let's parse it back
+  return JSON.parse(json);
+}
+
+
 function extractEval_(value) {
   return eval(value);
 }
@@ -103,15 +118,46 @@ function validateCell_(value, fieldType, settings) {
       value = extractList_(value, settings);
     } else if (fieldType === "Google Sheet") {
       value = extractGoogleSheet_(value, settings);
-    }
-    else if (fieldType === "Eval") {
+    } else if (fieldType === "Google Tab") {
+      value = extractGoogleTab_(value, settings);
+    } else if (fieldType === "Eval") {
       value = extractEval_(value, settings);
+    } else if (fieldType === "Boolean") {
+      value = checkBoolean_(value);
     }
 
   }
 
   return value;
 }
+
+
+function checkBoolean_(term){
+  if (typeof term === "boolean") {
+    return term;
+  }
+
+  if (typeof term === "number") {
+    if (term) {
+      return true;
+    }
+    return false;
+  }
+
+  if (typeof term !== "string") {
+    term = term.toString();
+  }
+
+  var termToCheck = term.toLowerCase();
+  return termToCheck === "y" ||
+    termToCheck === "yes" ||
+    termToCheck == "1" ||
+    termToCheck === "true" ||
+    termToCheck === "t";
+}
+
+
+
 
 function buildJSON_(sheet, settings) {
   /**
