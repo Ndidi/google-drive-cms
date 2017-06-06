@@ -27,6 +27,7 @@ function extractGoogleSheet_(value, settings) {
   return JSON.parse(json);
 }
 
+
 function extractGoogleTab_(value, settings) {
 
   // If this field is blank then return an empty array
@@ -132,6 +133,7 @@ function validateCell_(value, fieldType, settings) {
 }
 
 
+
 function checkBoolean_(term){
   if (typeof term === "boolean") {
     return term;
@@ -155,7 +157,6 @@ function checkBoolean_(term){
     termToCheck === "true" ||
     termToCheck === "t";
 }
-
 
 
 
@@ -184,6 +185,24 @@ function buildJSON_(sheet, settings) {
       fieldTypeRange = sheet.getRange(firstFieldTypeRow, firstHeaderColumn, 1, numberOfHeaders),
       fieldTypeValues = fieldTypeRange.getValues()[0];
 
+  /**
+  Validate Field Types:
+  Either have one each of: Key Column, Variable Type Column, Value Column or
+  have none of the above.
+  */
+  var columnFieldTypes = [];
+  for (var i = 0; i < fieldTypeValues.length; i++) {
+    if (['Key Column', 'Variable Type Column', 'Value Column'].indexOf(fieldTypeValues[i]) !== -1) {
+      if (columnFieldTypes.indexOf(fieldTypeValues[i]) === -1) {
+        columnFieldTypes.push(fieldTypeValues[i]);
+      }
+    }
+  }
+  if ([0, 3].indexOf(columnFieldTypes.length) === -1) {
+    throw new Error('Must either use no column field types or all three.');
+  }
+
+
   var data = [];
 
   // Starting at the row after the headers
@@ -195,12 +214,35 @@ function buildJSON_(sheet, settings) {
     // Create an empty object
     var dataObj = new Object();
 
-    // For each value in the row, add a key (header) to our object with that value
-    for (var i = 0; i < rowValues.length; i++) {
-      var ft = fieldTypeValues[i] || "Simple",
-          hd = headerValues[i],
-          rv = rowValues[i] || "";
+    if (columnFieldTypes.length === 3) {
+      /** Get Row by Row Field Type and Validate **/
+      var i = fieldTypeValues.indexOf('Variable Type Column');
+      var ft = rowValues[i];
+      if (['Key Column', 'Variable Type Column', 'Value Column'].indexOf(ft) !== -1) {
+        throw new Error("Cannot use column field types on individual row " + row + ".");
+      }
+
+      /* Get Key name for this column */
+      i = fieldTypeValues.indexOf('Key Column');
+      var hd = rowValues[i];
+      if (! hd) {
+        throw new Error("Key Column must be filled in on row " + row + ".");
+      }
+
+      /* Get Value from Value column */
+      i = fieldTypeValues.indexOf('Value Column');
+      var rv = rowValues[i];
+
       dataObj[hd] = validateCell_(rv, ft, settings);
+
+    } else {
+      // For each value in the row, add a key (header) to our object with that value
+      for (var i = 0; i < rowValues.length; i++) {
+        var ft = fieldTypeValues[i] || "Simple",
+            hd = headerValues[i],
+            rv = rowValues[i] || "";
+        dataObj[hd] = validateCell_(rv, ft, settings);
+      }
     }
 
     // Push that object to an array containing all objects
