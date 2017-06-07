@@ -202,17 +202,17 @@ function buildJSON_(sheet, settings) {
     throw new Error('Must either use no column field types or all three.');
   }
 
-
-  var data = [];
+  if (columnFieldTypes.length === 3) {
+    var data = {};
+  } else {
+    var data = [];
+  }
 
   // Starting at the row after the headers
   for (var row = firstContentRow; row <= lastRow; row++) {
     // Get the values of the row at position "row" from the first header, and going 1 row deep until the last column
     var rowRange = sheet.getRange(row, firstHeaderColumn, 1, lastColumn),
         rowValues = rowRange.getValues()[0];
-
-    // Create an empty object
-    var dataObj = new Object();
 
     if (columnFieldTypes.length === 3) {
       /** Get Row by Row Field Type and Validate **/
@@ -233,9 +233,12 @@ function buildJSON_(sheet, settings) {
       i = fieldTypeValues.indexOf('Value Column');
       var rv = rowValues[i];
 
-      dataObj[hd] = validateCell_(rv, ft, settings);
+      data[hd] = validateCell_(rv, ft, settings);
 
     } else {
+      // Create an empty object
+      var dataObj = new Object();
+
       // For each value in the row, add a key (header) to our object with that value
       for (var i = 0; i < rowValues.length; i++) {
         var ft = fieldTypeValues[i] || "Simple",
@@ -243,10 +246,12 @@ function buildJSON_(sheet, settings) {
             rv = rowValues[i] || "";
         dataObj[hd] = validateCell_(rv, ft, settings);
       }
+
+      // Push that object to an array containing all objects
+      data.push(dataObj);
     }
 
-    // Push that object to an array containing all objects
-    data.push(dataObj);
+
   }
 
   // If there is a key provided in the settings, store data behind that key
