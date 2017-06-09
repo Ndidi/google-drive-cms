@@ -112,7 +112,12 @@ function validateCell_(value, fieldType, settings) {
   // Is the value rich content (a Google Doc URL)? If yes, extract it.
   value = extractRichContent_(value, fieldType);
 
-  // If fieldType is a "list", build an array
+  // If fieldType is "Boolean", handle all cases including empty values
+  if (fieldType === "Boolean") {
+    value = checkBoolean_(value, settings);
+  }
+
+  // If non empty value, handle other fieldTypes
   if (!!value) {
 
     if (fieldType === "List") {
@@ -123,8 +128,6 @@ function validateCell_(value, fieldType, settings) {
       value = extractGoogleTab_(value, settings);
     } else if (fieldType === "Eval") {
       value = extractEval_(value, settings);
-    } else if (fieldType === "Boolean") {
-      value = checkBoolean_(value);
     }
 
   }
@@ -134,28 +137,26 @@ function validateCell_(value, fieldType, settings) {
 
 
 
-function checkBoolean_(term){
+function checkBoolean_(term, settings){
   if (typeof term === "boolean") {
     return term;
   }
 
   if (typeof term === "number") {
-    if (term) {
-      return true;
+    return !!(term);
+  }
+
+  if (typeof term === "string") {
+    var trueList = settings.trueList;
+    if (typeof trueList !== "string" || !trueList.trim()) {
+      trueList = "yes, y, true, t";
     }
-    return false;
+    var termsToCheck = trueList.toLowerCase().split(',').map(function(x) {return x.trim();});
+    return termsToCheck.indexOf(term.toLowerCase().trim()) > -1;
   }
 
-  if (typeof term !== "string") {
-    term = term.toString();
-  }
-
-  var termToCheck = term.toLowerCase();
-  return termToCheck === "y" ||
-    termToCheck === "yes" ||
-    termToCheck == "1" ||
-    termToCheck === "true" ||
-    termToCheck === "t";
+  // Otherwise
+  return false;
 }
 
 
