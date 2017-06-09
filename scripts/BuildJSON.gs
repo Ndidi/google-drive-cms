@@ -112,7 +112,12 @@ function validateCell_(value, fieldType, settings) {
   // Is the value rich content (a Google Doc URL)? If yes, extract it.
   value = extractRichContent_(value, fieldType);
 
-  // If fieldType is a "list", build an array
+  // If fieldType is "Boolean", handle all cases including empty values
+  if (fieldType === "Boolean") {
+    value = checkBoolean_(value, settings);
+  }
+
+  // If non empty value, handle other fieldTypes
   if (!!value) {
 
     if (fieldType === "List") {
@@ -123,8 +128,6 @@ function validateCell_(value, fieldType, settings) {
       value = extractGoogleTab_(value, settings);
     } else if (fieldType === "Eval") {
       value = extractEval_(value, settings);
-    } else if (fieldType === "Boolean") {
-      value = checkBoolean_(value);
     }
 
   }
@@ -134,29 +137,78 @@ function validateCell_(value, fieldType, settings) {
 
 
 
-function checkBoolean_(term){
+function checkBoolean_(term, settings){
   if (typeof term === "boolean") {
     return term;
   }
 
   if (typeof term === "number") {
-    if (term) {
-      return true;
+    return !!(term);
+  }
+
+  if (typeof term === "string") {
+    var trueList = settings.trueList;
+    if (typeof trueList !== "string" || !trueList.trim()) {
+      trueList = "yes, y, true, t";
     }
-    return false;
+    var termsToCheck = trueList.toLowerCase().split(',').map(function(x) {return x.trim();});
+    return termsToCheck.indexOf(term.toLowerCase().trim()) > -1;
   }
 
-  if (typeof term !== "string") {
-    term = term.toString();
-  }
-
-  var termToCheck = term.toLowerCase();
-  return termToCheck === "y" ||
-    termToCheck === "yes" ||
-    termToCheck == "1" ||
-    termToCheck === "true" ||
-    termToCheck === "t";
+  // Otherwise
+  return false;
 }
+
+
+
+function handleChildRows(dataObj, data, firstHeader) {
+  // Child level is based upon prepended dashes on first field
+  var firstField = dataObj[firstHeader];
+
+  // When child level is 0, just push data object on to data
+  // Otherwise try to add data object to children array
+  var parent = null, childLevel = 0;
+
+  // Can determine child level if both
+  // first field is a string of dashes and there are parents
+  if (typeof firstField === 'string' && data.length) {
+    // Get the first word and check if it is all dashes
+    var firstWord = firstField.trim().split(' ', 1)[0];
+    var dashes = firstWord.split('');
+    if (!dashes.some(function(x) {return x !== '-';})) {
+      // Child level is the number of dashes
+      childLevel = dashes.length;
+    }
+  }
+
+  // If there is a child level,
+  // then make sure there already is a parent for that child
+  if (childLevel) {
+    var parent = data[data.length - 1];
+    for (var parentLevel = 1; parentLevel < dashes.length; parentLevel++) {
+      if ('children' in parent) {
+        parent = parent['children'][parent['children'].length - 1];
+      } else {
+        parent = null;
+        break;
+      }
+    }
+  }
+
+  // Add child row to parent
+  if (parent) {
+    if (!('children' in parent)){
+      parent['children'] = [];
+    }
+    parent['children'].push(dataObj);
+  }
+
+  // If no parent child relationship (or not valid), then push row directly to data
+  if (!parent) {
+    data.push(dataObj);
+  }
+}
+
 
 
 
@@ -184,6 +236,7 @@ function buildJSON_(sheet, settings) {
       headerValues = headerRange.getValues()[0],
       fieldTypeRange = sheet.getRange(firstFieldTypeRow, firstHeaderColumn, 1, numberOfHeaders),
       fieldTypeValues = fieldTypeRange.getValues()[0];
+  var firstHeader = headerValues[0];
 
   /**
   Validate Field Types:
@@ -205,6 +258,7 @@ function buildJSON_(sheet, settings) {
   if (columnFieldTypes.length === 3) {
     var data = {};
   } else {
+    var initialData = [];
     var data = [];
   }
 
@@ -248,10 +302,17 @@ function buildJSON_(sheet, settings) {
       }
 
       // Push that object to an array containing all objects
-      data.push(dataObj);
+      initialData.push(dataObj);
     }
+  }
 
-
+  if (columnFieldTypes.length === 0) {
+    // For each row in initial data,
+    // Add to data or if a child row, add to children of last entry
+    for (var row = 0; row < initialData.length; row++) {
+      var dataObj = initialData[row];
+      handleChildRows(dataObj, data, firstHeader);
+    }
   }
 
   // If there is a key provided in the settings, store data behind that key
