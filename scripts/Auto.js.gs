@@ -14,5 +14,6 @@ function onOpen() {
   ui.createMenu("Google Drive CMS")
   .addItem("Publish", "publish")
   .addItem("Export content", "export")
+  .addItem("Verify JSON Contents", "verifyJSON")
   .addToUi();
 }
