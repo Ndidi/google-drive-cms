@@ -57,7 +57,7 @@
 | 4  | logo               | Simple &#8711;               | https://image/url     |   |
 | 5  | about              | Simple &#8711;               | https://google/doc/url|   |
 | 6  | staff              | Google Tab &#8711;           | (Tab Name for Staff)  |   |
-| 7  | down_for_maint     | Boolean                      | No                    |   |
+| 7  | down_for_maint     | Boolean &#8711;              | No                    |   |
 
 #### Copyright 2017: David Quisenberry and Benjamin T. Seaver
 #### License: MIT
