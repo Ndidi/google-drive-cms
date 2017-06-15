@@ -50,7 +50,7 @@
 ### Example for Key, Type Value sheets
 
 |    |  A                 |  B                           | C                     | D |
-|----|--------------------|------------------------------|-----------------------|   |
+|----|--------------------|------------------------------|-----------------------|---|
 | 1  | **Key**            | **Type**                     | **Value**             |   |
 | 2  | Key Column &#8711; | Variable Type Column &#8711; | Value Column &#8711;  |   |
 | 3  | site_name          | Simple &#8711;               | Specialty Brewery     |   |
@@ -58,7 +58,7 @@
 | 5  | about              | Simple &#8711;               | https://google/doc/url|   |
 | 6  | staff              | Google Tab &#8711;           | (Tab Name for Staff)  |   |
 | 7  | down_for_maint     | Boolean                      | No                    |   |
-        
+
 #### Copyright 2017: David Quisenberry and Benjamin T. Seaver
 #### License: MIT
 #### Support: None
