@@ -1,8 +1,9 @@
-# DriveCMS Extensions
-#### Extending DriveCMS Google Sheet functionality
-#### By David Quisenberry and Benjamin T. Seaver
+# Extensions to `The Google Drive CMS`
+#### See https://www.drivecms.xyz/ by Max Barry for original work and documentation
 
-### See https://www.drivecms.xyz/ by Max Berry for original work and documentation
+#### Enhancing the core functionality with additional features to bring content into the outputted JSON object
+
+#### By David Quisenberry and Benjamin T. Seaver
 
 ### How to use these extensions?
 1. First follow the instructions on https://www.drivecms.xyz/ to get up and running with the existing functionality.
@@ -64,7 +65,7 @@
 
 |    |  A                 |  B                           | C                     | D            | E                   | F                 |
 |----|--------------------|------------------------------|-----------------------|--------------|---------------------|-------------------|
-| 1  | **pass_fail**      | **test_descriptione**        | **property_path**     | **function** | **expected_result** | **actual_result** |
+| 1  | **pass_fail**      | **test_description**         | **property_path**     | **function** | **expected_result** | **actual_result** |
 | 2  | Pass               | Site Name is "Specialty..."  | site_name             | equals       | Specialty Brewery   | Specialty Brewery |
 | 3  | Pass               | Logo exists                  | logo                  | exists       | TRUE                | TRUE              |
 | 4  | Pass               | About page exists            | about                 | exists       | TRUE                | TRUE              |
@@ -74,7 +75,7 @@
 Notes:
   * There are three functions: `equals`, `exists` and `count`.  Count applies to tabular data (arrays of objects).
   * The `property_path` is dot and array notation to the property you wish to check.
-  
+
 #### Copyright 2017: David Quisenberry and Benjamin T. Seaver
 #### License: MIT
 #### Support: None
