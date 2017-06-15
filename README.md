@@ -47,7 +47,7 @@
 
 5. Provide a mechanism to verify that essential data elements are included in the JSON output.
 
-### Example for Key, Type Value sheets
+### Example of Key, Type Value sheets
 
 |    |  A                 |  B                           | C                     | D |
 |----|--------------------|------------------------------|-----------------------|---|
@@ -59,6 +59,22 @@
 | 6  | staff              | Google Tab &#8711;           | (Tab Name for Staff)  |   |
 | 7  | down_for_maint     | Boolean &#8711;              | No                    |   |
 
+
+### Example of Verification sheet
+
+|    |  A                 |  B                           | C                     | D            | E                   | F                 |
+|----|--------------------|------------------------------|-----------------------|--------------|---------------------|-------------------|
+| 1  | **pass_fail**      | **test_descriptione**        | **property_path**     | **function** | **expected_result** | **actual_result** |
+| 2  | Pass               | Site Name is "Specialty..."  | site_name             | equals       | Specialty Brewery   | Specialty Brewery |
+| 3  | Pass               | Logo exists                  | logo                  | exists       | TRUE                | TRUE              |
+| 4  | Pass               | About page exists            | about                 | exists       | TRUE                | TRUE              |
+| 5  | Pass               | First staff record is founder| staff[0].title        | equals       | Founder             | Founder           |
+| 6  | **Fail**           | 8 Staff (actually 9  now)    | staff                 | count        | 8                   | 9                 |
+
+Notes:
+  * There are three functions: `equals`, `exists` and `count`.  Count applies to tabular data (arrays of objects).
+  * The `property_path` is dot and array notation to the property you wish to check.
+  
 #### Copyright 2017: David Quisenberry and Benjamin T. Seaver
 #### License: MIT
 #### Support: None
